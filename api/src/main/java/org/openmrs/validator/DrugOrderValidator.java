@@ -45,8 +45,7 @@ public class DrugOrderValidator extends OrderValidator {
 	 * 
 	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
 	 *      org.springframework.validation.Errors)
-	 * @should not fail validation if drug is null
-	 * @should fail validation if order concept is null
+	 * @should not fail validation if drug is null and drug order concept is set
 	 * @should fail validation if drug concept is different from order concept
 	 * @should fail validation if drug concept is not set
 	 * @should fail validation if drug dose is set and units is not set
@@ -60,7 +59,7 @@ public class DrugOrderValidator extends OrderValidator {
 		if (order == null) {
 			errors.rejectValue("order", "error.general");
 		} else {
-			ValidationUtils.rejectIfEmpty(errors, "concept", "error.null");
+			
 			if (order.getDuration() != null)
 				ValidationUtils.rejectIfEmpty(errors, "durationUnits", "DrugOrder.add.error.missingDurationUnits");
 			
@@ -74,12 +73,18 @@ public class DrugOrderValidator extends OrderValidator {
 				ValidationUtils.rejectIfEmpty(errors, "doseUnits", "DrugOrder.add.error.missingDoseUnits");
 			
 			// for the following elements Order.hbm.xml says: not-null="true"
-			ValidationUtils.rejectIfEmpty(errors, "drug", "error.null");
-			if (order.getDrug() != null)
-				ValidationUtils.rejectIfEmpty(errors, "drug.concept", "error.null");
 			
-			if (!(order.getConcept() == null)) {
-				if (!(order.getDrug() == null) && !(order.getDrug().getConcept().equals(order.getConcept()))) {
+			// if 'order.drug' is null, the order concept should not be null
+			if (order.getDrug() != null) {
+				ValidationUtils.rejectIfEmpty(errors, "drug.concept", "error.null");
+			} else {
+				if (order.getConcept() == null) {
+					errors.rejectValue("concept", "error.concept");
+				}
+			}
+			
+			if (order.getConcept() != null) {
+				if (order.getDrug() != null && !(order.getDrug().getConcept().equals(order.getConcept()))) {
 					errors.rejectValue("drug", "error.general");
 					errors.rejectValue("concept", "error.concept");
 					
