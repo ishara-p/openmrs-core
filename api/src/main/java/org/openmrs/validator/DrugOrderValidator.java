@@ -75,7 +75,7 @@ public class DrugOrderValidator extends OrderValidator {
 			
 			// for the following elements Order.hbm.xml says: not-null="true"
 			if (order.getDrug() != null) {
-				ValidationUtils.rejectIfEmpty(errors, "drug.concept", "error.null");
+				ValidationUtils.rejectIfEmpty(errors, "drug.concept", "error.drug.noConcept");
 			}
 			
 			if (order.getConcept() != null) {
